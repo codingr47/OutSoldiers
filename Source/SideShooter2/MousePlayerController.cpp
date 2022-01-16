@@ -5,10 +5,9 @@
 #include "Components/CanvasPanelSlot.h"
 
 AMousePlayerController::AMousePlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
-	this->bShowMouseCursor = true;//true;false;
+	this->bShowMouseCursor = false;
 	this->bEnableClickEvents = true;
 	this->bEnableMouseOverEvents = true;
-	//this->SetMouseCursorWidget()
 	static ConstructorHelpers::FClassFinder<UUserWidget> widgetDefaultCrosshairFinder(TEXT("/Game/UI/tennisCrosshair"));
 	tennisWidgetClass = widgetDefaultCrosshairFinder.Class;
 }
@@ -36,9 +35,11 @@ void AMousePlayerController::CenterViewportCursor()
 	}
 }
 
-/*void AMousePlayerController::Tick(float deltaTime) {
-	CenterViewportCursor();
-}*/
+void AMousePlayerController::Tick(float deltaTime) {
+	GetMousePosition(this->globalX, this->globalY);
+	//UE_LOG(LogTemp, Warning, TEXT("x: %f, y: %f"), this->globalX, this->globalY);
+	UpdateCursor();
+}
 
 void AMousePlayerController::BeginPlay() {
 	Super::BeginPlay();
@@ -52,12 +53,11 @@ void AMousePlayerController::BeginPlay() {
 		InputComponent->BindAxis("MouseClickLeft", this, &AMousePlayerController::OnLeftClick);
 		InputComponent->BindAxis("MoveRight", this, &AMousePlayerController::MoveRight);
 	}	
-	//AddYawInput(0.1);
-	//AddPitchInput(0.1);
+	AddYawInput(0.1);
+	AddPitchInput(0.1);
 	UCrosshairUserWidget * widgetTennis = CreateWidget<UCrosshairUserWidget>(this, tennisWidgetClass);
 	crosshairs.Add(widgetTennis);
-	//widgetTennis->AddToPlayerScreen();
-	SetMouseCursorWidget(EMouseCursor::Default, widgetTennis);
+	widgetTennis->AddToPlayerScreen();
 	UpdateCursor();
 	controlledCharacter = GetPawn();
 	isCharacterFacingRight = true;
@@ -70,6 +70,13 @@ float AMousePlayerController::absoluteDifference(float val, float val2) {
 
 void AMousePlayerController::OnXChange(float diffX) {
 	FVector2D vSize = getGameViewportSize();
+	this->vWidth = vSize.X;
+	this->vHeight = vSize.Y;
+	if (this->globalX > vWidth - 30.0f) this->globalX = vWidth - 30.0f;
+	if (0 > this->globalX) this->globalX = 0.0f;
+	//UE_LOG(LogTemp, Warning, TEXT("diffSign: %f, diffX: %f, width:%f, x:%f, y:%f"), diffSign, diffX, this->vWidth, this->globalX, this->globalY);
+	middlewareCharacterDirection();
+	/*FVector2D vSize = getGameViewportSize();
 	this->vWidth = vSize.X;
 	this->vHeight = vSize.Y;
 	float diffSign = 1.0f;
@@ -87,10 +94,10 @@ void AMousePlayerController::OnXChange(float diffX) {
 		UE_LOG(LogTemp, Warning, TEXT("diffSign: %f, diffX: %f, width:%f, x:%f, y:%f"), diffSign, diffX, this->vWidth, this->globalX, this->globalY);
 		UpdateCursor();
 		middlewareCharacterDirection();
-	}
+	}*/
 }
 void AMousePlayerController::OnYChange(float diffY) {
-	if (absoluteDifference(diffY, 0) > EPSILON_MOUSE_OVER) {
+	/*if (absoluteDifference(diffY, 0) > EPSILON_MOUSE_OVER) {
 		float diffSign;
 		if (this->globalY < 0)  GetMousePosition(this->globalX, this->globalY);
 		else {
@@ -104,11 +111,10 @@ void AMousePlayerController::OnYChange(float diffY) {
 		if (0 > this->globalY) this->globalY = 0.0f;
 		UE_LOG(LogTemp, Warning, TEXT("diffSign: %f, diffX: %f, height:%f, x:%f, y:%f"), diffSign, diffY, this->vHeight, this->globalX, this->globalY);
 		UpdateCursor();
-	}
+	}*/
 }
 void AMousePlayerController::OnLeftClick(float val) {
 	if (0.0f != val) {
-		//UE_LOG(LogTemp, Warning, TEXT("click %f"), val);
 		UpdateCursor();
 	}
 }
@@ -118,13 +124,11 @@ void AMousePlayerController::MoveRight(float value)
 	if (isPlayerMoving && 0.0F == value) this->isPlayerMoving = false;
 	else if (!isPlayerMoving && 0.0F != value) this->isPlayerMoving = true;
 	if (0 > value && this->globalX > this->vWidth / 2 && !lastIsPlayerMoving) {
-		this->globalX = this->vWidth / 2 - MOUSE_PLAYER_DIFFERENCE_DELTA;
-		this->SetMouseLocation((int)vWidth / 2, (int)vHeight / 2);
+		this->SetMouseLocation((int)(vWidth / 2 - MOUSE_PLAYER_DIFFERENCE_DELTA), (int)vHeight / 2);
 		UpdateCursor();
 	}
 	if (0 < value && this->globalX < this->vWidth / 2 && !lastIsPlayerMoving) {
-		this->globalX = this->vWidth / 2 + MOUSE_PLAYER_DIFFERENCE_DELTA;
-		this->SetMouseLocation((int)vWidth / 2, (int)vHeight / 2);
+		this->SetMouseLocation((int)(vWidth / 2 + MOUSE_PLAYER_DIFFERENCE_DELTA), (int)vHeight / 2);
 		UpdateCursor();
 	}
 	controlledCharacter->AddMovementInput(FVector(0.f, -1.f, 0.f), value);
@@ -132,10 +136,10 @@ void AMousePlayerController::MoveRight(float value)
 
 
 void AMousePlayerController::UpdateCursor() {
-	//UUserWidget* currentWidget = crosshairs[0];
+	UUserWidget* currentWidget = crosshairs[0];
 	//UE_LOG(LogTemp, Warning, TEXT("x:%f, y:%f"), this->globalX, this->globalY);
-	//currentWidget->SetPositionInViewport(FVector2D(globalX, globalY));
-	SetMouseLocation((int)this->globalX, (int)this->globalY);
+	currentWidget->SetPositionInViewport(FVector2D(globalX, globalY));
+	//SetMouseLocation((int)this->globalX, (int)this->globalY);
 }
 
 void AMousePlayerController::middlewareCharacterDirection() {

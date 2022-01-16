@@ -25,7 +25,7 @@ public:
 	void OnLeftClick(float val);
 	void UpdateCursor();
 	void MoveRight(float Value);
-	//void Tick(float deltaTime);
+	void Tick(float deltaTime);
 	void CenterViewportCursor();
 	void UpdateDirection(float x, float y);
 	void TickTimer();
