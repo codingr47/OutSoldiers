@@ -150,12 +150,14 @@ void AMousePlayerController::middlewareCharacterDirection() {
 			FRotator newRotation(oldRotation.Pitch, FVector(0.f, -1.0f, 0.0f).Rotation().Yaw, oldRotation.Roll);
 			controlledCharacter->SetActorRotation(newRotation);
 			isCharacterFacingRight = !isCharacterFacingRight;
+			//GetWorld()->GetTimerManager().SetTimer(timer, this, &AMousePlayerController::TickTimer, SECONDS_SPEED);
 		}
 		else if (isCharacterFacingRight && (this->globalX < this->vWidth / 2)) { // move left
 			FRotator oldRotation = controlledCharacter->GetActorRotation();
 			FRotator newRotation(oldRotation.Pitch, FVector(0.f, 1.0f, 0.0f).Rotation().Yaw, oldRotation.Roll);
 			controlledCharacter->SetActorRotation(newRotation);
 			isCharacterFacingRight = !isCharacterFacingRight;
+			//GetWorld()->GetTimerManager().SetTimer(timer, this, &AMousePlayerController::TickTimer, SECONDS_SPEED);
 		}
 	}
 }
@@ -166,6 +168,7 @@ FVector2D AMousePlayerController::getGameViewportSize()
 	return widget->GetDimensions();
 }
 void AMousePlayerController::TickTimer() {
+	//bShowMouseCursor = false;
 	/*
 	SetInputMode(FInputModeGameAndUI());
 	CenterViewportCursor();
