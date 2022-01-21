@@ -19,6 +19,9 @@ class ASideShooter2Character : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = AnimationState)
+		bool shouldAim;
 protected:
 
 	/** Called for side to side input */
